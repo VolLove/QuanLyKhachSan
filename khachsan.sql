@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: localhost
--- Thời gian đã tạo: Th12 19, 2022 lúc 04:14 PM
+-- Thời gian đã tạo: Th12 25, 2022 lúc 01:58 PM
 -- Phiên bản máy phục vụ: 5.7.22
 -- Phiên bản PHP: 7.1.17
 
@@ -29,14 +29,14 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `bill` (
-  `_ID` int(11) NOT NULL,
+  `_ID` varchar(11) COLLATE utf8_unicode_ci NOT NULL,
   `_Name` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `_Identi` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
+  `_IDEmloyee` int(10) NOT NULL,
   `_IDRoom` int(11) NOT NULL,
   `_TimeCheckIn` datetime NOT NULL,
   `_TimeCheckOut` datetime DEFAULT NULL,
-  `_Pay` double NOT NULL DEFAULT '0',
-  `_IDEmloyee` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
+  `_Pay` double DEFAULT NULL,
   `_Start` varchar(50) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'Chưa thanh toán'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -45,7 +45,8 @@ CREATE TABLE `bill` (
 --
 
 INSERT INTO `bill` (`_ID`, `_Name`, `_Identi`, `_IDRoom`, `_TimeCheckIn`, `_TimeCheckOut`, `_Pay`, `_IDEmloyee`, `_Start`) VALUES
-(4, 'efw', '092HD678D8', 3, '2022-12-08 00:00:00', NULL, 0, '1', 'Chưa thanh toán');
+('1', 'Nguyễn Văn Tú', '67HD899UG7', 2, '2022-12-25 00:00:00', NULL, NULL, 1, 'Chưa thanh toán'),
+('5', 'Quốc Việt', '66DH67788D', 1, '2022-12-25 00:00:00', NULL, NULL, 2, 'Chưa thanh toán');
 
 -- --------------------------------------------------------
 
@@ -57,19 +58,21 @@ CREATE TABLE `employee` (
   `_ID` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
   `_Name` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
   `_Identi` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
+    `_Gender` varchar(10) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'Nam',
   `_Address` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
   `_DayOfBirth` date NOT NULL,
   `_DayOfJoining` date NOT NULL,
-  `_NumPhone` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
-  `gioitinh` varchar(10) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'Nam'
+  `_NumPhone` varchar(10) COLLATE utf8_unicode_ci NOT NULL
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `employee`
 --
 
-INSERT INTO `employee` (`_ID`, `_Name`, `_Identi`, `_Address`, `_DayOfBirth`, `_DayOfJoining`, `_NumPhone`, `gioitinh`) VALUES
-('1', 'Nguyễn Thanh Lâm', '092HD678D8', 'Linh Chiểu, Thủ Đức, TP.HCM', '1995-11-01', '2020-12-22', '0908377777', 'Nam');
+INSERT INTO `employee` (`_ID`, `_Name`, `_Identi`, `_Address`, `_DayOfBirth`, `_DayOfJoining`, `_NumPhone`, `_Gender`) VALUES
+('1', 'Nguyễn Thanh Lâm', '092HD678D8', 'Linh Chiểu, Thủ Đức, TP.HCM', '1995-11-01', '2020-12-22', '0908377777', 'Nam'),
+('2', 'Nguyễn Văn Dũng', '092HD678D8', 'Linh Chiểu, Thủ Đức, TP.HCM', '1995-11-01', '2020-12-22', '0908377777', 'Nam');
 
 -- --------------------------------------------------------
 
@@ -80,7 +83,6 @@ INSERT INTO `employee` (`_ID`, `_Name`, `_Identi`, `_Address`, `_DayOfBirth`, `_
 CREATE TABLE `room` (
   `_ID` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
   `_Name` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
-  `_Place` int(11) NOT NULL,
   `_Price` double NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -88,10 +90,10 @@ CREATE TABLE `room` (
 -- Đang đổ dữ liệu cho bảng `room`
 --
 
-INSERT INTO `room` (`_ID`, `_Name`, `_Place`, `_Price`) VALUES
-('1', 'Phòng 1', 1, 300000),
-('2', 'Phòng 2', 1, 200000),
-('3', 'Phòng 3', 1, 400000);
+INSERT INTO `room` (`_ID`, `_Name`, `_Price`) VALUES
+('1', 'Phòng 1', 300000),
+('2', 'Phòng 2', 200000),
+('3', 'Phòng 3', 400000);
 
 -- --------------------------------------------------------
 
@@ -140,16 +142,6 @@ ALTER TABLE `room`
 --
 ALTER TABLE `user`
   ADD PRIMARY KEY (`_UserName`);
-
---
--- AUTO_INCREMENT cho các bảng đã đổ
---
-
---
--- AUTO_INCREMENT cho bảng `bill`
---
-ALTER TABLE `bill`
-  MODIFY `_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

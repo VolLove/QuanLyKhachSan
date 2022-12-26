@@ -11,8 +11,16 @@ package model;
 public class RoomModel {
     private String idRoom;
     private String nameRoom;
-    private int place;
     private double total;
+
+    public RoomModel() {
+    }
+
+    public RoomModel(String idRoom, String nameRoom, double total) {
+        this.idRoom = idRoom;
+        this.nameRoom = nameRoom;
+        this.total = total;
+    }
 
     public String getIdRoom() {
         return idRoom;
@@ -30,14 +38,6 @@ public class RoomModel {
         this.nameRoom = nameRoom;
     }
 
-    public int getPlace() {
-        return place;
-    }
-
-    public void setPlace(int place) {
-        this.place = place;
-    }
-
     public double getTotal() {
         return total;
     }
@@ -46,10 +46,10 @@ public class RoomModel {
         this.total = total;
     }
 
-    public RoomModel(String idRoom, String nameRoom, int place, double total) {
-        this.idRoom = idRoom;
-        this.nameRoom = nameRoom;
-        this.place = place;
-        this.total = total;
+    @Override
+    public String toString() {
+        return "RoomModel{" + "idRoom=" + idRoom + ", nameRoom=" + nameRoom + ", total=" + total + '}';
     }
+
+   
 }

@@ -10,7 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
+import java.util.ArrayList;
 import model.BillModel;
 
 /**
@@ -20,78 +20,198 @@ import model.BillModel;
 public class BillController {
 
     Connection connection = DAO.getCon();
-    PreparedStatement pst;
-    ResultSet resultSet = null;
+    PreparedStatement preparedStatement = null;
+    Statement statement = null;
+    ArrayList<BillModel> billModels = new ArrayList<>();
 
-    public static ResultSet GetTableBill() {
-        Connection connection = DAO.getCon();
-        PreparedStatement pst;
-        ResultSet resultSet = null;
+
+    
+
+    
+    /**
+     *
+     * @return
+     */
+    public ArrayList<BillModel> GetTableBill() {
+        ResultSet resultSet;
+        billModels = new ArrayList<>();
         try {
-            pst = connection.prepareStatement("SELECT * FROM `bill`");
-            resultSet = pst.executeQuery();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `bill`");
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                String id = resultSet.getString("_ID");
+                String name = resultSet.getString("_Name");
+                String idClient = resultSet.getString("_Identi");
+                String idEmloyee = resultSet.getString("_IDEmloyee");
+                String idRoom = resultSet.getString("_IDRoom");
+                String timeIn = resultSet.getString("_TimeCheckIn");
+                String timeOut = resultSet.getString("_TimeCheckOut");
+                double pay = resultSet.getDouble("_Pay");
+                int start = resultSet.getInt("_Start");
+                BillModel billModel = new BillModel(id, idClient, name, idEmloyee, idRoom, timeIn, timeOut, pay, start);
+                billModels.add(billModel);
+            }
+
         } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
         }
-        return resultSet;
+        return billModels;
     }
 
-    public static boolean deleteBill(String id) throws SQLException {
-        Connection connection = DAO.getCon();
-        Statement s = null;
+    public boolean deleteBill(String id) {
         try {
-            s = connection.createStatement();
-            String string = ("DELETE FROM `bill` WHERE `_ID` = " + id);
-            s.executeUpdate(string);
-            if (s != null) {
-                return true;
-            } else {
+            statement = connection.createStatement();
+            String string = ("DELETE FROM `bill` WHERE `_ID` = '" + id + "'");
+            statement.executeUpdate(string);
+            return statement != null;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    public boolean updateBill(BillModel billModel) {
+
+        try {
+            statement = connection.createStatement();
+
+            String string = ("UPDATE `bill` SET "
+                    + "`_Name`='" + billModel.getNameClient()
+                    + "',`_Identi`='" + billModel.getIdClient()
+                    + "',`_IDEmloyee`='" + billModel.getIdEmployee()
+                    + "',`_IDRoom`='" + billModel.getIdRoom()
+                    + "',`_TimeCheckIn`='" + billModel.getTimeCheckIn()
+                    + "',`_TimeCheckOut`='" + billModel.getTimeCheckOut()
+                    + "',`_Pay`='" + billModel.getPay()
+                    + "',`_Start` = '" + billModel.getStart()
+                    + "' WHERE `_ID` = '" + billModel.getId() + "'");
+            statement.execute(string);
+            return statement != null;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    public boolean insertBill(BillModel billModel) {
+        try {
+            statement = connection.createStatement();
+            String string = ("INSERT INTO `bill`(`_ID`,`_Name`, `_Identi`,`_IDEmloyee`, `_IDRoom`, `_TimeCheckIn`,`_Start`) "
+                    + "VALUES ('" + billModel.getId() + "','"
+                    + billModel.getNameClient() + "','"
+                    + billModel.getIdClient() + "','"
+                    + billModel.getIdEmployee() + "','"
+                    + billModel.getIdRoom() + "','"
+                    + billModel.getTimeCheckIn() + "','"
+                    + billModel.getStart() + "')");
+            statement.executeUpdate(string);
+            return statement != null;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    public BillModel getBill(int index) {
+        return billModels.get(index);
+    }
+    public BillModel getBillByID(String id) {
+        for (BillModel billModel : billModels) {
+            if (billModel.getId().equals(id)) {
+                return billModel;
+            }
+        }
+        return new BillModel();
+    }
+    public boolean roomEmty(String roomID) {
+        for (BillModel billModel : billModels) {
+            if (billModel.getIdRoom().compareTo(roomID) == 0 && billModel.getStart() == 0) {
                 return false;
             }
-        } catch (SQLException e) {
-
-            return false;
-        } finally {
-            connection.close();
-        }
-    }
-
-    public static boolean update(BillModel billModel) {
-        Connection connection = DAO.getCon();
-        Statement s = null;
-        try {
-
-        } catch (Exception e) {
-        } finally {
         }
         return true;
     }
 
-    public double total(Date dIn, Date dOut, String idRoom) {
+    public ArrayList<BillModel> sortByDate() {
+        ResultSet resultSet;
+        billModels = new ArrayList<>();
+        try {
+            preparedStatement = connection.prepareStatement("SELECT * FROM `bill` ORDER BY `_TimeCheckIn` DESC  ,`_Name` ASC");
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                String id = resultSet.getString("_ID");
+                String name = resultSet.getString("_Name");
+                String idClient = resultSet.getString("_Identi");
+                String idEmloyee = resultSet.getString("_IDEmloyee");
+                String idRoom = resultSet.getString("_IDRoom");
+                String timeIn = resultSet.getString("_TimeCheckIn");
+                String timeOut = resultSet.getString("_TimeCheckOut");
+                double pay = resultSet.getDouble("_Pay");
+                int start = resultSet.getInt("_Start");
+                BillModel billModel = new BillModel(id, idClient, name, idEmloyee, idRoom, timeIn, timeOut, pay, start);
+                billModels.add(billModel);
+            }
 
-        long tmp = Math.abs(dIn.getTime() - dOut.getTime());
-        double d = (double) tmp / (1000 * 60 * 60);
-        d = Math.floor(d*10)/10;
-        double price = selectPriceRoom(idRoom);
-        price = Math.floor(price*10)/10;
-        double total = d*price;
-        return total;
+        } catch (SQLException e) {
+        }
+        return billModels;
     }
 
-    public double selectPriceRoom(String id) {
-        double price = 0;
-
+    public ArrayList<BillModel> sortByName() {
+        ResultSet resultSet;
+        billModels = new ArrayList<>();
         try {
-            pst = connection.prepareStatement("SELECT `_Price` FROM `room` where `_ID` = " + id);
-            resultSet = pst.executeQuery();
+            preparedStatement = connection.prepareStatement("SELECT * FROM `bill` ORDER BY `_Name` ASC");
+            resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                price = resultSet.getDouble("_Price");
+                String id = resultSet.getString("_ID");
+                String name = resultSet.getString("_Name");
+                String idClient = resultSet.getString("_Identi");
+                String idEmloyee = resultSet.getString("_IDEmloyee");
+                String idRoom = resultSet.getString("_IDRoom");
+                String timeIn = resultSet.getString("_TimeCheckIn");
+                String timeOut = resultSet.getString("_TimeCheckOut");
+                double pay = resultSet.getDouble("_Pay");
+                int start = resultSet.getInt("_Start");
+                BillModel billModel = new BillModel(id, idClient, name, idEmloyee, idRoom, timeIn, timeOut, pay, start);
+                billModels.add(billModel);
             }
+
         } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
         }
-        return price;
+        return billModels;
+    }
+
+    public ArrayList<BillModel> sortByPay() {
+        ResultSet resultSet;
+        billModels = new ArrayList<>();
+        try {
+            preparedStatement = connection.prepareStatement("SELECT * FROM `bill` ORDER BY `_Pay` DESC ,`_Name` ASC");
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                String id = resultSet.getString("_ID");
+                String name = resultSet.getString("_Name");
+                String idClient = resultSet.getString("_Identi");
+                String idEmloyee = resultSet.getString("_IDEmloyee");
+                String idRoom = resultSet.getString("_IDRoom");
+                String timeIn = resultSet.getString("_TimeCheckIn");
+                String timeOut = resultSet.getString("_TimeCheckOut");
+                double pay = resultSet.getDouble("_Pay");
+                int start = resultSet.getInt("_Start");
+                BillModel billModel = new BillModel(id, idClient, name, idEmloyee, idRoom, timeIn, timeOut, pay, start);
+                billModels.add(billModel);
+            }
+
+        } catch (SQLException e) {
+        }
+        return billModels;
+    }
+
+    public boolean roomOrderEmty(BillModel bill) {
+        for (BillModel billModel : billModels) {
+            if (!billModel.getId().equals(bill.getId())) {
+                if (billModel.getIdRoom().equals(bill.getIdRoom()) && billModel.getStart() == 0) {
+                  
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

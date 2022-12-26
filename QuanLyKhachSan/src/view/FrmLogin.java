@@ -42,6 +42,7 @@ public class FrmLogin extends javax.swing.JFrame {
         txtUser = new javax.swing.JTextPane();
         jLabel3 = new javax.swing.JLabel();
         txtPas = new javax.swing.JPasswordField();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -81,7 +82,19 @@ public class FrmLogin extends javax.swing.JFrame {
 
         jLabel3.setText("Đăng nhập");
 
-        txtPas.setText("jPasswordField1");
+        txtPas.setText("****");
+        txtPas.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                txtPasMouseClicked(evt);
+            }
+        });
+        txtPas.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtPasActionPerformed(evt);
+            }
+        });
+
+        jButton1.setText("Tạo tài khoản");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -91,7 +104,7 @@ public class FrmLogin extends javax.swing.JFrame {
                 .addGap(54, 54, 54)
                 .addComponent(btnDangNhap, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnThoat, javax.swing.GroupLayout.DEFAULT_SIZE, 103, Short.MAX_VALUE)
+                .addComponent(btnThoat, javax.swing.GroupLayout.DEFAULT_SIZE, 133, Short.MAX_VALUE)
                 .addGap(68, 68, 68))
             .addGroup(layout.createSequentialGroup()
                 .addGap(17, 17, 17)
@@ -103,7 +116,11 @@ public class FrmLogin extends javax.swing.JFrame {
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 208, Short.MAX_VALUE)
                     .addComponent(txtPas))
-                .addGap(21, 21, 21))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton1)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -123,7 +140,9 @@ public class FrmLogin extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnDangNhap, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnThoat, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(36, 36, 36))
+                .addGap(18, 18, 18)
+                .addComponent(jButton1)
+                .addContainerGap(42, Short.MAX_VALUE))
         );
 
         jLabel1.getAccessibleContext().setAccessibleName("frmUser");
@@ -142,12 +161,12 @@ public class FrmLogin extends javax.swing.JFrame {
         } catch (SQLException ex) {
             ex.getStackTrace();
         }
-        if (loginQuest==true) {
+        if (loginQuest == true) {
             this.setVisible(false);
             new FrmHome().setVisible(loginQuest);
             this.dispose();
         } else {
-            JOptionPane.showConfirmDialog(this,"Tài khoản hoặc mật khẩu sai!", "Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showConfirmDialog(this, "Tài khoản hoặc mật khẩu sai!", "Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
         }
 
     }//GEN-LAST:event_btnDangNhapActionPerformed
@@ -174,6 +193,19 @@ public class FrmLogin extends javax.swing.JFrame {
             this.dispose();
         }
     }//GEN-LAST:event_formWindowClosing
+
+    private void txtPasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPasActionPerformed
+        // TODO add your handling code here:
+
+    }//GEN-LAST:event_txtPasActionPerformed
+        int x = 0;
+    private void txtPasMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtPasMouseClicked
+        // TODO add your handling code here:
+        if (x == 0) {
+            txtPas.setText("");
+            x++;
+        }
+    }//GEN-LAST:event_txtPasMouseClicked
 
     /**
      * @param args the command line arguments
@@ -213,6 +245,7 @@ public class FrmLogin extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDangNhap;
     private javax.swing.JButton btnThoat;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

@@ -9,6 +9,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import model.RoomModel;
 
 /**
  *
@@ -16,19 +19,46 @@ import java.sql.SQLException;
  */
 public class RoomController {
 
-    Connection connection = DAO.getCon();
-    PreparedStatement pst;
-    ResultSet resultSet = null;
+    private Connection connection = DAO.getCon();
+    private PreparedStatement pst;
+    private Statement statement ;
+    private ResultSet resultSet = null;
+    private ArrayList<RoomModel> roomModels = new ArrayList<>();
 
-    public ResultSet selectTable() {
+    public ResultSet getRoomTable() {
         try {
+            roomModels = new ArrayList<>();
             pst = connection.prepareStatement("SELECT * FROM `room`");
             resultSet = pst.executeQuery();
+            while (resultSet.next()) {
+                String roomID = resultSet.getString("_ID");
+                String roomName = resultSet.getString("_Name");
+                double roomPrice = resultSet.getDouble("_Price");
+                RoomModel roomModel = new RoomModel(roomID, roomName, roomPrice);
+                roomModels.add(roomModel);
+            }
+
         } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
+            
         }
         return resultSet;
     }
 
+    public ArrayList<RoomModel> getListRoom() {
+        getRoomTable();
+        return roomModels;
+    }
+
+    public RoomModel getRoomByIndex(int index) {
+      return roomModels.get(index);
+    }
+    public RoomModel getRoomByID(String id){
+        for (RoomModel roomModel : roomModels) {
+            if (roomModel.getIdRoom().compareTo(id)==0) {
+                return roomModel;
+            }
+        }
+        return null;
+    }
+ 
 }

@@ -4,28 +4,32 @@
  */
 package model;
 
-import java.util.Date;
 
 /**
  *
  * @author Admin
  */
-public class EmloyeeModel {
+public class EmployeeModel {
+
     private String id;
     private String name;
+    private String gender;
     private String identi;
     private String address;
-    private Date birthDate;
-    private Date joinDate;
+    private String birthDate;
     private String numberPhone;
 
-    public EmloyeeModel(String id, String name, String identi, String address, Date birthDate, Date joinDate, String numberPhone) {
+    public EmployeeModel() {
+    }
+
+    public EmployeeModel(String id, String name, String gender, String identi, String address, String birthDate, String numberPhone) {
         this.id = id;
         this.name = name;
+        this.gender = gender;
         this.identi = identi;
         this.address = address;
         this.birthDate = birthDate;
-        this.joinDate = joinDate;
+
         this.numberPhone = numberPhone;
     }
 
@@ -45,6 +49,14 @@ public class EmloyeeModel {
         this.name = name;
     }
 
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
     public String getIdenti() {
         return identi;
     }
@@ -61,20 +73,12 @@ public class EmloyeeModel {
         this.address = address;
     }
 
-    public Date getBirthDate() {
+    public String getBirthDate() {
         return birthDate;
     }
 
-    public void setBirthDate(Date birthDate) {
+    public void setBirthDate(String birthDate) {
         this.birthDate = birthDate;
-    }
-
-    public Date getJoinDate() {
-        return joinDate;
-    }
-
-    public void setJoinDate(Date joinDate) {
-        this.joinDate = joinDate;
     }
 
     public String getNumberPhone() {
@@ -84,4 +88,10 @@ public class EmloyeeModel {
     public void setNumberPhone(String numberPhone) {
         this.numberPhone = numberPhone;
     }
+
+    @Override
+    public String toString() {
+        return "EmloyeeModel{" + "id=" + id + ", name=" + name + ", gender=" + gender + ", identi=" + identi + ", address=" + address + ", birthDate=" + birthDate + ", numberPhone=" + numberPhone + '}';
+    }
+
 }

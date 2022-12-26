@@ -4,23 +4,20 @@
  */
 package view;
 
-import DAO.DAO;
 import controller.BillController;
-
-import java.time.LocalDateTime;
-import model.BillModel;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import controller.EmployeeController;
+import controller.RoomController;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import model.BillModel;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import model.EmployeeModel;
+import model.RoomModel;
 
 /**
  *
@@ -31,11 +28,13 @@ public class FrmBillTable extends javax.swing.JFrame {
     /**
      * Creates new form FrmBillTable
      */
-    ArrayList<Object[]> arrayList1 = new ArrayList<>();
+    RoomController roomController = new RoomController();
+    BillController billController = new BillController();
+    EmployeeController employeeController = new EmployeeController();
 
     public FrmBillTable() {
         initComponents();
-        load();
+        loadTable();
     }
 
     /**
@@ -54,13 +53,12 @@ public class FrmBillTable extends javax.swing.JFrame {
         jButton5 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tableBill = new javax.swing.JTable();
-        jPanel1 = new javax.swing.JPanel();
+        pnl = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         btnInsert = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
         btnEdit = new javax.swing.JButton();
         btnRefresh = new javax.swing.JButton();
-        btnSearch = new javax.swing.JButton();
         btnClose = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
@@ -69,7 +67,6 @@ public class FrmBillTable extends javax.swing.JFrame {
         txtName = new javax.swing.JTextField();
         txtCCCD = new javax.swing.JTextField();
         cboPhong = new javax.swing.JComboBox<>();
-        txtByEmploy = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         btnNow = new javax.swing.JButton();
@@ -81,10 +78,18 @@ public class FrmBillTable extends javax.swing.JFrame {
         txtID = new javax.swing.JTextField();
         txtTimeCheckIn = new javax.swing.JTextField();
         btnCheckOut = new javax.swing.JButton();
+        filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
+        filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
+        filler3 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
+        cboEmloyee = new javax.swing.JComboBox<>();
+        txtNameEmloyee = new javax.swing.JTextField();
+        txth = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        btnTinhPhí = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        btnnSortByName = new javax.swing.JButton();
+        btnSortByDate = new javax.swing.JButton();
+        btnSortByPay = new javax.swing.JButton();
 
         javax.swing.GroupLayout jFrame1Layout = new javax.swing.GroupLayout(jFrame1.getContentPane());
         jFrame1.getContentPane().setLayout(jFrame1Layout);
@@ -121,7 +126,7 @@ public class FrmBillTable extends javax.swing.JFrame {
                 {null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "STT", "Tên khách hàng", "ID", "Nhân viên lập", "Số phòng", "Giờ đăt", "Giờ trả", "Phí", "Tình trạng"
+                "Mã hoá đơn", "Tên khách hàng", "Căn cước", "Nhân viên lập", "Số phòng", "Giờ đăt", "Giờ trả", "Phí", "Tình trạng"
             }
         ) {
             boolean[] canEdit = new boolean [] {
@@ -138,20 +143,15 @@ public class FrmBillTable extends javax.swing.JFrame {
                 tableBillMouseClicked(evt);
             }
         });
-        tableBill.addComponentListener(new java.awt.event.ComponentAdapter() {
-            public void componentShown(java.awt.event.ComponentEvent evt) {
-                tableBillComponentShown(evt);
-            }
-        });
         jScrollPane1.setViewportView(tableBill);
         if (tableBill.getColumnModel().getColumnCount() > 0) {
-            tableBill.getColumnModel().getColumn(0).setPreferredWidth(5);
+            tableBill.getColumnModel().getColumn(0).setPreferredWidth(50);
             tableBill.getColumnModel().getColumn(1).setPreferredWidth(50);
-            tableBill.getColumnModel().getColumn(2).setPreferredWidth(11);
+            tableBill.getColumnModel().getColumn(2).setPreferredWidth(50);
             tableBill.getColumnModel().getColumn(4).setPreferredWidth(10);
         }
 
-        jPanel1.setBackground(new java.awt.Color(255, 255, 204));
+        pnl.setBackground(new java.awt.Color(255, 255, 204));
 
         jPanel2.setLayout(new java.awt.GridLayout(1, 0));
 
@@ -179,21 +179,13 @@ public class FrmBillTable extends javax.swing.JFrame {
         });
         jPanel2.add(btnEdit);
 
-        btnRefresh.setText("Refresh");
+        btnRefresh.setText("Tải lại");
         btnRefresh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnRefreshActionPerformed(evt);
             }
         });
         jPanel2.add(btnRefresh);
-
-        btnSearch.setText("Tìm kiếm");
-        btnSearch.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSearchActionPerformed(evt);
-            }
-        });
-        jPanel2.add(btnSearch);
 
         btnClose.setText("Thoát");
         btnClose.addActionListener(new java.awt.event.ActionListener() {
@@ -215,18 +207,11 @@ public class FrmBillTable extends javax.swing.JFrame {
         jLabel4.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel4.setText("Số phòng");
 
-        cboPhong.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "1", "2", "3", "4", "5", "6", " " }));
-        cboPhong.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboPhongActionPerformed(evt);
-            }
-        });
+        jLabel5.setText("Thời gian đặt phòng");
 
-        jLabel5.setText("Time check in");
+        jLabel6.setText("Thời gian trả phòng");
 
-        jLabel6.setText("Time chech out");
-
-        btnNow.setText("Now");
+        btnNow.setText("Giờ đặt hiện tại");
         btnNow.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnNowActionPerformed(evt);
@@ -234,345 +219,493 @@ public class FrmBillTable extends javax.swing.JFrame {
         });
 
         btnThanhToan.setText("Thanh toán");
+        btnThanhToan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnThanhToanActionPerformed(evt);
+            }
+        });
 
         jLabel12.setText("Phí");
 
         jLabel13.setText("Số hoá đơn");
 
-        btnCheckOut.setText("Now check out");
+        btnCheckOut.setText("Giờ thanh toán (hiện tại)");
         btnCheckOut.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCheckOutActionPerformed(evt);
             }
         });
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(31, 31, 31)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtByEmploy, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(6, 6, 6)
-                        .addComponent(txtID, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(cboPhong, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtCCCD, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(164, 164, 164)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(532, 532, 532))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(txtPhi, javax.swing.GroupLayout.PREFERRED_SIZE, 199, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(273, 273, 273))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(60, 60, 60)
-                                        .addComponent(txtTimeCheckIn, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addComponent(txtTimeCheckOut, javax.swing.GroupLayout.PREFERRED_SIZE, 199, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(42, 42, 42)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(btnNow, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(btnCheckOut))
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnThanhToan, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(204, 204, 204))))
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        cboEmloyee.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cboEmloyeeItemStateChanged(evt);
+            }
+        });
+
+        txtNameEmloyee.setEnabled(false);
+
+        jLabel7.setText("Số giờ");
+
+        btnTinhPhí.setText("Tính phí");
+        btnTinhPhí.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTinhPhíActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout pnlLayout = new javax.swing.GroupLayout(pnl);
+        pnl.setLayout(pnlLayout);
+        pnlLayout.setHorizontalGroup(
+            pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlLayout.createSequentialGroup()
                 .addGap(37, 37, 37)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 973, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10))
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(54, 54, 54))
+            .addGroup(pnlLayout.createSequentialGroup()
+                .addGap(39, 39, 39)
+                .addGroup(pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel13, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(txtCCCD, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtName, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(cboEmloyee, javax.swing.GroupLayout.Alignment.LEADING, 0, 251, Short.MAX_VALUE)
+                    .addComponent(txtNameEmloyee, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtID, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(cboPhong, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(62, 62, 62)
+                .addGroup(pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlLayout.createSequentialGroup()
+                        .addGap(127, 127, 127)
+                        .addComponent(filler1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(pnlLayout.createSequentialGroup()
+                        .addGroup(pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(pnlLayout.createSequentialGroup()
+                                .addGroup(pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                        .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 116, Short.MAX_VALUE)
+                                        .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                        .addGroup(pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(pnlLayout.createSequentialGroup()
+                                .addGap(166, 166, 166)
+                                .addComponent(filler2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(28, 28, 28)
+                                .addComponent(filler3, javax.swing.GroupLayout.DEFAULT_SIZE, 168, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlLayout.createSequentialGroup()
+                                .addGroup(pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(txth, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtTimeCheckOut)
+                                    .addComponent(txtTimeCheckIn)
+                                    .addComponent(txtPhi, javax.swing.GroupLayout.Alignment.LEADING))
+                                .addGap(4, 4, 4)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(btnNow, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 185, Short.MAX_VALUE)
+                            .addComponent(btnCheckOut, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 185, Short.MAX_VALUE)
+                            .addComponent(btnTinhPhí, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnThanhToan, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(56, 56, 56))))
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        pnlLayout.setVerticalGroup(
+            pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlLayout.createSequentialGroup()
                 .addGap(6, 6, 6)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGap(18, 18, 18)
+                .addComponent(filler1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlLayout.createSequentialGroup()
+                        .addGroup(pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtID, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel13))
-                        .addGap(18, 18, 18)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtByEmploy, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel1))
-                        .addGap(18, 18, 18)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addGap(8, 8, 8)
+                        .addGroup(pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel1)
+                            .addComponent(txtNameEmloyee, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(9, 9, 9)
+                        .addComponent(cboEmloyee, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtName)
                             .addComponent(jLabel2))
-                        .addGap(16, 16, 16))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                .addGap(29, 29, 29)
-                                .addComponent(jLabel5)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 49, Short.MAX_VALUE)
-                                .addComponent(jLabel6))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                .addGap(29, 29, 29)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(txtTimeCheckIn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(btnNow))
-                                .addGap(17, 17, 17)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(txtTimeCheckOut, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(btnCheckOut))))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addGap(16, 16, 16)
+                        .addGroup(pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(txtCCCD, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel12)
                             .addComponent(txtPhi, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel12))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtCCCD, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel3))
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addComponent(btnThanhToan))
                         .addGap(18, 18, 18)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addGroup(pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(cboPhong, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel4)))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(42, 42, 42)
-                        .addComponent(btnThanhToan, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(73, 73, 73))
+                    .addGroup(pnlLayout.createSequentialGroup()
+                        .addGroup(pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel5)
+                                .addComponent(txtTimeCheckIn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlLayout.createSequentialGroup()
+                                .addComponent(btnNow)
+                                .addGap(18, 18, 18)
+                                .addGroup(pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(txtTimeCheckOut, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(btnCheckOut)
+                                    .addComponent(jLabel6))))
+                        .addGap(18, 18, 18)
+                        .addGroup(pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(pnlLayout.createSequentialGroup()
+                                .addGroup(pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(txth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel7))
+                                .addGap(22, 22, 22)
+                                .addGroup(pnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(filler2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(filler3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(btnTinhPhí))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addGap(53, 53, 53))
         );
 
         jPanel3.setBackground(new java.awt.Color(0, 255, 102));
         jPanel3.setLayout(new java.awt.GridLayout(1, 0));
 
-        jButton1.setText("Theo tên");
-        jPanel3.add(jButton1);
+        btnnSortByName.setText("Sắp xếp theo tên");
+        btnnSortByName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnnSortByNameActionPerformed(evt);
+            }
+        });
+        jPanel3.add(btnnSortByName);
 
-        jButton2.setText("Gần đây");
-        jPanel3.add(jButton2);
+        btnSortByDate.setText("Sắp xếp theo ngày đặt gần đây");
+        btnSortByDate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSortByDateActionPerformed(evt);
+            }
+        });
+        jPanel3.add(btnSortByDate);
 
-        jButton3.setText("Phí cao nhất");
-        jPanel3.add(jButton3);
+        btnSortByPay.setText("Sắp xếp theo thanh toán cao nhất");
+        btnSortByPay.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSortByPayActionPerformed(evt);
+            }
+        });
+        jPanel3.add(btnSortByPay);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane1)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(6, 6, 6)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap())
+                        .addComponent(jScrollPane1)
+                        .addGap(2, 2, 2))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(pnl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(pnl, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void btnInsertActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInsertActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnInsertActionPerformed
-    BillController controller = new BillController();
-    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        try {
-            // TODO add your handling code here:
-            boolean b = BillController.deleteBill(txtID.getText());
-            load();
-        } catch (SQLException ex) {
-            Logger.getLogger(FrmBillTable.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }//GEN-LAST:event_btnDeleteActionPerformed
-
-    private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnEditActionPerformed
-
-    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnSearchActionPerformed
-
-    private void btnCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseActionPerformed
-        this.setVisible(false);
-        new FrmHome().setVisible(true);
-        this.dispose();
-    }//GEN-LAST:event_btnCloseActionPerformed
-
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+
         this.setVisible(false);
-        new FrmHome().setVisible(true);
+//        new FrmHome().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_formWindowClosing
-
-    private void cboPhongActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboPhongActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cboPhongActionPerformed
-
-    private void btnNowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNowActionPerformed
-        // TODO add your handling code here:
-        LocalDateTime d = LocalDateTime.now();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        txtTimeCheckIn.setText(dateTimeFormatter.format(d));
-
-    }//GEN-LAST:event_btnNowActionPerformed
-
-    private void tableBillComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_tableBillComponentShown
-
-    }//GEN-LAST:event_tableBillComponentShown
 
     private void tableBillMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableBillMouseClicked
         // TODO add your handling code here:
         int indext = tableBill.getSelectedRow();
-        BillModel bm = billModels.get(indext);
-        Object[] os = arrayList1.get(indext);
+        BillModel bm = billController.getBill(indext);
+
         txtID.setText(bm.getId());
         txtName.setText(bm.getNameClient());
         txtCCCD.setText(bm.getIdClient());
-        txtByEmploy.setText(bm.getIdEmployee());
-        cboPhong.setSelectedItem(os[4]);
-        txtTimeCheckIn.setText(String.valueOf(os[5]));
-        txtTimeCheckOut.setText(String.valueOf(os[6]));
-        txtPhi.setText(String.valueOf(os[7]));
+        String idEmloy = billController.getBill(indext).getIdEmployee();
+        cboEmloyee.setSelectedItem(idEmloy);
+        String nameRoom = roomController.getRoomByID(bm.getIdRoom()).getNameRoom();
+        cboPhong.setSelectedItem(nameRoom);
+        txtTimeCheckIn.setText(bm.getTimeCheckIn());
+        txtTimeCheckOut.setText(bm.getTimeCheckOut());
+        txtPhi.setText(String.valueOf(bm.getPay()));
     }//GEN-LAST:event_tableBillMouseClicked
 
-    private void btnCheckOutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCheckOutActionPerformed
+    private void btnNowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNowActionPerformed
         // TODO add your handling code here:
         LocalDateTime d = LocalDateTime.now();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        txtTimeCheckIn.setText(dateTimeFormatter.format(d));
+    }//GEN-LAST:event_btnNowActionPerformed
 
-        String timeIn = txtTimeCheckIn.getText();
-        String timeOut = dateTimeFormatter.format(d);
-
-        Date dIn = new Date(), dOut = new Date();
-        try {
-            dIn = formatter.parse(timeIn);
-            dOut = formatter.parse(timeOut);
-        } catch (ParseException ex) {
-        }
-        txtTimeCheckOut.setText(timeOut);
-        System.out.println(dIn.toString());
-        System.out.println(dOut.toString());
-        double total = controller.total(dIn, dOut, String.valueOf(cboPhong.getSelectedItem()));
- 
-        txtPhi.setText(String.valueOf(total));
-
-    }//GEN-LAST:event_btnCheckOutActionPerformed
+    private void btnCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseActionPerformed
+        this.setVisible(false);
+//        new FrmHome().setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnCloseActionPerformed
 
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
         // TODO add your handling code here:
-        load();
+        txtCCCD.setText("");
+        txtID.setText("");
+        txtName.setText("");
+        txtPhi.setText("");
+        txtTimeCheckIn.setText("");
+        txtTimeCheckOut.setText("");
+        loadTable();
     }//GEN-LAST:event_btnRefreshActionPerformed
 
-    ArrayList<BillModel> billModels = new ArrayList<>();
+    private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
+        // TODO add your handling code here:
 
-    private void load() {
-        Connection connection = DAO.getCon();
-        DefaultTableModel Model;
-        Model = (DefaultTableModel) tableBill.getModel();
-        Model.setRowCount(0);
+        if (!"".equals(txtID.getText())) {
+            String id = txtID.getText();
+            String name = txtName.getText();
+            String identi = txtCCCD.getText();
+            String timeCheckIn = txtTimeCheckIn.getText();
+            String idEmloyee = cboEmloyee.getSelectedItem().toString();
+            int roomIndex = cboPhong.getSelectedIndex();
+            String idRoom = roomController.getRoomByIndex(roomIndex).getIdRoom();
+            String timeCheckOut = txtTimeCheckOut.getText();
+            double pay = Double.parseDouble(txtPhi.getText());
+            BillModel billModel = new BillModel(id, identi, name, idEmloyee, idRoom, timeCheckIn, timeCheckOut, pay);
 
-        try {
-            ResultSet resultSet = BillController.GetTableBill();
-            BillModel billModel;
-
-            while (resultSet.next()) {
-                String id = resultSet.getString("_ID");
-                String name = resultSet.getString("_Name");
-                String idClient = resultSet.getString("_Identi");
-                String idEmloyee = resultSet.getString("_IDEmloyee");
-                String idRoom = resultSet.getString("_IDRoom");
-                String timeIn = resultSet.getString("_TimeCheckIn");
-                String timeOut = resultSet.getString("_TimeCheckOut");
-                double pay = resultSet.getDouble("_Pay");
-                String start = resultSet.getString("_Start");
-                billModel = new BillModel(id, idClient, name, idEmloyee, idRoom, timeIn, timeOut, pay);
-                billModels.add(billModel);
-                Object[] row = new Object[tableBill.getColumnCount()];
-                row[0] = resultSet.getString("_ID");
-                row[1] = resultSet.getString("_Name");
-                row[2] = resultSet.getString("_Identi");
-                row[3] = resultSet.getString("_IDEmloyee");
-                row[4] = resultSet.getString("_IDRoom");
-                row[5] = resultSet.getString("_TimeCheckIn");
-                row[6] = resultSet.getString("_TimeCheckOut");
-                row[7] = resultSet.getDouble("_Pay");
-                row[8] = resultSet.getString("_Start");
-                arrayList1.add(row);
-                Model.addRow(row);
+            if (billController.roomOrderEmty(billModel) == true) {
+                if ((JOptionPane.showConfirmDialog(this, "Bạn có muốn cập nhật lại thông tin đơn hàng?", "", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == 0)) {
+                    if (billController.updateBill(billModel) == true) {
+                        JOptionPane.showConfirmDialog(this, "Đơn đặt hàng đã được cập nhật!", "", JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                    }
+                    btnRefreshActionPerformed(evt);
+                }
+            } else {
+                JOptionPane.showConfirmDialog(this, "Phòng đã được đặt", "", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
             }
-        } catch (SQLException e) {
+
+        } else {
+            JOptionPane.showConfirmDialog(this, "Vui lòng nhập thông tin", "", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
         }
+    }//GEN-LAST:event_btnEditActionPerformed
 
-    }
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+        if ("".equals(txtID.getText())) {
+            JOptionPane.showConfirmDialog(this, "Vui lòng nhập mã đơn hàng muốn xoá", "", JOptionPane.OK_OPTION, JOptionPane.WARNING_MESSAGE);
+        } else if (JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn xoá không?", "Xoá", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == 0) {
+            if (billController.deleteBill(txtID.getText()) == true) {
+                JOptionPane.showConfirmDialog(this, "Đơn đặt hàng đã được xoá!", "Đã xoá", JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE);
+            }
+            loadTable();
+        }
+    }//GEN-LAST:event_btnDeleteActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
+    private void btnInsertActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInsertActionPerformed
+        // TODO add your handling code here:
+
+        if (!"".equals(txtName.getText()) && !"".equals(txtCCCD.getText()) && !"".equals(txtTimeCheckIn.getText())) {
+            if (JOptionPane.showConfirmDialog(this, "Bạn có muốn tạo đặt phòng mới?", "Đặt phòng", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == 0) {
+                int roomIndex = cboPhong.getSelectedIndex();
+                String idRoom = String.valueOf(roomController.getRoomByIndex(roomIndex).getIdRoom());
+                if (billController.roomEmty(idRoom) == true) {
+                    LocalDateTime dateTime = LocalDateTime.now();
+                    String id = "DH" + String.valueOf(dateTime.getYear()) + String.valueOf(dateTime.getDayOfYear()) + String.valueOf(dateTime.getHour()) + String.valueOf(dateTime.getMinute()) + String.valueOf(dateTime.getSecond());
+                    String name = txtName.getText();
+                    String identi = txtCCCD.getText();
+                    String timeCheckIn = txtTimeCheckIn.getText();
+                    String idEmloyee = cboEmloyee.getSelectedItem().toString();
+                    BillModel billModel = new BillModel(id, identi, name, idEmloyee, idRoom, timeCheckIn);
+                    if (billController.insertBill(billModel) == true) {
+                        JOptionPane.showConfirmDialog(this, "Phòng đã đươc đặt!", "", JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                    }
+                    btnRefreshActionPerformed(evt);
+                } else {
+                    JOptionPane.showConfirmDialog(this, "Phòng đã có người đặt", "", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FrmBillTable.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FrmBillTable.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FrmBillTable.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FrmBillTable.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } else {
+            JOptionPane.showConfirmDialog(this, "Vui lòng nhập thông tin", "", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
         }
-        //</editor-fold>
+    }//GEN-LAST:event_btnInsertActionPerformed
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new FrmBillTable().setVisible(true);
+    private void cboEmloyeeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cboEmloyeeItemStateChanged
+        // TODO add your handling code here:
+        int i = cboEmloyee.getSelectedIndex();
+        if (i >= 0) {
+            txtNameEmloyee.setText(employeeController.getEmloyeeIndex(i).getName());
 
+        }
+    }//GEN-LAST:event_cboEmloyeeItemStateChanged
+
+    private void btnnSortByNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnnSortByNameActionPerformed
+        // TODO add your handling code here:
+
+        DefaultTableModel Model = (DefaultTableModel) tableBill.getModel();
+        Model.setRowCount(0);
+        for (BillModel billModel : billController.sortByName()) {
+            String nameRoom = roomController.getRoomByID(billModel.getIdRoom()).getNameRoom();
+            String nameEmloyee = employeeController.getEmloyeeByID(billModel.getIdEmployee()).getName();
+            String start = "Chưa thanh toán";
+            if (billModel.getStart() == 1) {
+                start = "Đã thanh toán";
             }
-        });
+            Object[] objects = {billModel.getId(), billModel.getNameClient(), billModel.getIdClient(), nameEmloyee, nameRoom, billModel.getTimeCheckIn(), billModel.getTimeCheckOut(), billModel.getPay(), start};
+            Model.addRow(objects);
+        }
+    }//GEN-LAST:event_btnnSortByNameActionPerformed
+
+    private void btnSortByDateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSortByDateActionPerformed
+        // TODO add your handling code here:
+
+        DefaultTableModel Model = (DefaultTableModel) tableBill.getModel();
+        Model.setRowCount(0);
+        for (BillModel billModel : billController.sortByDate()) {
+            String nameRoom = roomController.getRoomByID(billModel.getIdRoom()).getNameRoom();
+            String nameEmloyee = employeeController.getEmloyeeByID(billModel.getIdEmployee()).getName();
+            String start = "Chưa thanh toán";
+            if (billModel.getStart() == 1) {
+                start = "Đã thanh toán";
+            }
+            Object[] objects = {billModel.getId(), billModel.getNameClient(), billModel.getIdClient(), nameEmloyee, nameRoom, billModel.getTimeCheckIn(), billModel.getTimeCheckOut(), billModel.getPay(), start};
+            Model.addRow(objects);
+        }
+    }//GEN-LAST:event_btnSortByDateActionPerformed
+
+    private void btnSortByPayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSortByPayActionPerformed
+        // TODO add your handling code here:
+
+        DefaultTableModel Model = (DefaultTableModel) tableBill.getModel();
+        Model.setRowCount(0);
+        for (BillModel billModel : billController.sortByPay()) {
+            String nameRoom = roomController.getRoomByID(billModel.getIdRoom()).getNameRoom();
+            String nameEmloyee = employeeController.getEmloyeeByID(billModel.getIdEmployee()).getName();
+            String start = "Chưa thanh toán";
+            if (billModel.getStart() == 1) {
+                start = "Đã thanh toán";
+            }
+            Object[] objects = {billModel.getId(), billModel.getNameClient(), billModel.getIdClient(), nameEmloyee, nameRoom, billModel.getTimeCheckIn(), billModel.getTimeCheckOut(), billModel.getPay(), start};
+            Model.addRow(objects);
+        }
+    }//GEN-LAST:event_btnSortByPayActionPerformed
+
+    private void btnCheckOutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCheckOutActionPerformed
+        LocalDateTime d = LocalDateTime.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        txtTimeCheckOut.setText(dateTimeFormatter.format(d));
+        btnTinhPhíActionPerformed(evt);
+    }//GEN-LAST:event_btnCheckOutActionPerformed
+
+    private void btnThanhToanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThanhToanActionPerformed
+        // TODO add your handling code here:
+        if (!"".equals(txtID.getText())) {
+            String id = txtID.getText();
+            String name = txtName.getText();
+            String identi = txtCCCD.getText();
+            String timeCheckIn = txtTimeCheckIn.getText();
+            String idEmloyee = cboEmloyee.getSelectedItem().toString();
+            int roomIndex = cboPhong.getSelectedIndex();
+            String idRoom = roomController.getRoomByIndex(roomIndex).getIdRoom();
+            String timeCheckOut = txtTimeCheckOut.getText();
+            double hour = Double.parseDouble(txth.getText());
+            double price = roomController.getRoomByID(idRoom).getTotal();
+            double pay = hour * price;
+            int start = billController.getBillByID(id).getStart();
+            if (start == 0) {
+                start = 1;
+                BillModel billModel = new BillModel(id, identi, name, idEmloyee, idRoom, timeCheckIn, timeCheckOut, pay, start);
+                if ((JOptionPane.showConfirmDialog(this, "Bạn có muốn thanh toán phòng?", "", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == 0)) {
+                    billController.updateBill(billModel);
+                    btnRefreshActionPerformed(evt);
+                }
+            } else {
+                JOptionPane.showConfirmDialog(this, "Hoá đơn đã thanh toán", "", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+            }
+
+        } else {
+            JOptionPane.showConfirmDialog(this, "Vui lòng nhập thông tin", "", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_btnThanhToanActionPerformed
+
+    private void btnTinhPhíActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTinhPhíActionPerformed
+        // TODO add your handling code here:
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date timeIn;
+        Date timeOut;
+        try {
+            timeIn = dateFormat.parse(txtTimeCheckIn.getText());
+            timeOut = dateFormat.parse(txtTimeCheckOut.getText());
+            long getDiff = timeOut.getTime() - timeIn.getTime();
+            long getDaysDiff = getDiff / (60 * 60 * 1000);
+            txth.setText(String.valueOf(getDaysDiff));
+            int roomIndex = cboPhong.getSelectedIndex();
+            String idRoom = roomController.getRoomByIndex(roomIndex).getIdRoom();
+            double price = roomController.getRoomByID(idRoom).getTotal();
+            double total = price * (double) getDaysDiff;
+            txtPhi.setText(String.valueOf(total));
+        } catch (ParseException ex) {
+
+        }
+    }//GEN-LAST:event_btnTinhPhíActionPerformed
+
+    private void loadTable() {
+
+        DefaultTableModel Model = (DefaultTableModel) tableBill.getModel();
+        Model.setRowCount(0);
+        roomController.getRoomTable();
+        cboEmloyee.removeAllItems();
+        cboPhong.removeAllItems();
+        roomController.getRoomTable();
+        employeeController.getEmployeeTable();
+        for (BillModel billModel : billController.GetTableBill()) {
+            String nameRoom;
+            String nameEmloyee;
+            try {
+                nameRoom = roomController.getRoomByID(billModel.getIdRoom()).getNameRoom();
+
+            } catch (Exception e) {
+                nameRoom = billModel.getIdRoom();
+            }
+            try {
+                nameEmloyee = employeeController.getEmloyeeByID(billModel.getIdEmployee()).getName();
+
+            } catch (Exception e) {
+                nameEmloyee = billModel.getIdEmployee();
+            }
+            String start = "Chưa thanh toán";
+            if (billModel.getStart() == 1) {
+                start = "Đã thanh toán";
+            }
+            Object[] objects = {billModel.getId(), billModel.getNameClient(), billModel.getIdClient(), nameEmloyee, nameRoom, billModel.getTimeCheckIn(), billModel.getTimeCheckOut(), billModel.getPay(), start};
+            Model.addRow(objects);
+        }
+        for (RoomModel roomModel : roomController.getListRoom()) {
+            cboPhong.addItem(roomModel.getNameRoom());
+        }
+        for (EmployeeModel emloyeeModel : employeeController.getListEmloyee()) {
+            cboEmloyee.addItem(emloyeeModel.getId());
+        }
     }
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCheckOut;
@@ -582,12 +715,16 @@ public class FrmBillTable extends javax.swing.JFrame {
     private javax.swing.JButton btnInsert;
     private javax.swing.JButton btnNow;
     private javax.swing.JButton btnRefresh;
-    private javax.swing.JButton btnSearch;
+    private javax.swing.JButton btnSortByDate;
+    private javax.swing.JButton btnSortByPay;
     private javax.swing.JButton btnThanhToan;
+    private javax.swing.JButton btnTinhPhí;
+    private javax.swing.JButton btnnSortByName;
+    private javax.swing.JComboBox<String> cboEmloyee;
     private javax.swing.JComboBox<String> cboPhong;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
+    private javax.swing.Box.Filler filler1;
+    private javax.swing.Box.Filler filler2;
+    private javax.swing.Box.Filler filler3;
     private javax.swing.JButton jButton5;
     private javax.swing.JFrame jFrame1;
     private javax.swing.JLabel jLabel1;
@@ -598,20 +735,22 @@ public class FrmBillTable extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JPanel pnl;
     private javax.swing.JTable tableBill;
-    private javax.swing.JTextField txtByEmploy;
     private javax.swing.JTextField txtCCCD;
     private javax.swing.JTextField txtID;
     private javax.swing.JTextField txtName;
+    private javax.swing.JTextField txtNameEmloyee;
     private javax.swing.JTextField txtPhi;
     private javax.swing.JTextField txtTimeCheckIn;
     private javax.swing.JTextField txtTimeCheckOut;
+    private javax.swing.JTextField txth;
     // End of variables declaration//GEN-END:variables
 }

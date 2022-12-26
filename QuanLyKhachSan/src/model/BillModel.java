@@ -4,7 +4,6 @@
  */
 package model;
 
-import java.util.Date;
 
 /**
  *
@@ -18,15 +17,23 @@ public class BillModel {
     private String idEmployee;
     private String idRoom;
     private String timeCheckIn;
-    private String timeCheckOut;
-    private double pay;
+    private String timeCheckOut = "2000-01-01 00:00:00";
+    private double pay = 0;
+    private int start = 0;
 
-    public BillModel(String idClient, String nameClient, String idEmployee, String idRoom, String timeCheckIn) {
-        this.idClient = idClient;
-        this.nameClient = nameClient;
-        this.idEmployee = idEmployee;
-        this.idRoom = idRoom;
-        this.timeCheckIn = timeCheckIn;
+    public BillModel() {
+    }
+
+    public BillModel(BillModel billModel) {
+        this.id = billModel.getId();
+        this.idClient = billModel.getIdClient();
+        this.nameClient = billModel.getNameClient();
+        this.idEmployee = billModel.getIdEmployee();
+        this.idRoom = billModel.getIdRoom();
+        this.timeCheckIn = billModel.getTimeCheckIn();
+        this.timeCheckOut = billModel.getTimeCheckOut();
+        this.pay = billModel.getPay();
+        this.start = billModel.getStart();
     }
 
     public BillModel(String id, String idClient, String nameClient, String idEmployee, String idRoom, String timeCheckIn, String timeCheckOut, double pay) {
@@ -36,8 +43,33 @@ public class BillModel {
         this.idEmployee = idEmployee;
         this.idRoom = idRoom;
         this.timeCheckIn = timeCheckIn;
-        this.timeCheckOut = timeCheckOut;
+        if (!"".equals(timeCheckOut)) {
+            this.timeCheckOut = timeCheckOut;
+        }
         this.pay = pay;
+    }
+
+    public BillModel(String id, String idClient, String nameClient, String idEmployee, String idRoom, String timeCheckIn, String timeCheckOut, double pay, int start) {
+        this.id = id;
+        this.idClient = idClient;
+        this.nameClient = nameClient;
+        this.idEmployee = idEmployee;
+        this.idRoom = idRoom;
+        this.timeCheckIn = timeCheckIn;
+        if (!"".equals(timeCheckOut)) {
+            this.timeCheckOut = timeCheckOut;
+        }
+        this.pay = pay;
+        this.start = start;
+    }
+
+    public BillModel(String id, String idClient, String nameClient, String idEmployee, String idRoom, String timeCheckIn) {
+        this.id = id;
+        this.idClient = idClient;
+        this.nameClient = nameClient;
+        this.idEmployee = idEmployee;
+        this.idRoom = idRoom;
+        this.timeCheckIn = timeCheckIn;
     }
 
     public String getId() {
@@ -104,7 +136,17 @@ public class BillModel {
         this.pay = pay;
     }
 
-    public BillModel() {
+    public int getStart() {
+        return start;
     }
 
+    public void setStart(int start) {
+        this.start = start;
+    }
+
+    @Override
+    public String toString() {
+        return "BillModel{" + "id=" + id + ", idClient=" + idClient + ", nameClient=" + nameClient + ", idEmployee=" + idEmployee + ", idRoom=" + idRoom + ", timeCheckIn=" + timeCheckIn + ", timeCheckOut=" + timeCheckOut + ", pay=" + pay + ", start=" + start + '}';
+    }
+    
 }

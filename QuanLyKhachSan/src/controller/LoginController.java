@@ -17,10 +17,10 @@ import java.sql.Statement;
  */
 public class LoginController {
 
-    Connection connection = DAO.getCon();
-    PreparedStatement preparedStatement = null;
-    Statement statement = null;
-    ResultSet resultSet = null;
+    private Connection connection = DAO.getCon();
+    private PreparedStatement preparedStatement = null;
+    private Statement statement = null;
+    private ResultSet resultSet = null;
 
     public boolean login(String user, String pass) throws SQLException {
         try {
@@ -29,7 +29,7 @@ public class LoginController {
             resultSet = preparedStatement.executeQuery();
             return true;
         } catch (SQLException e) {
-           return  false;
+            return false;
         } finally {
             connection.close();
         }

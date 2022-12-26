@@ -4,7 +4,12 @@
  */
 package view;
 
+import controller.EmployeeController;
+import java.time.LocalDateTime;
+import java.util.Random;
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import model.EmployeeModel;
 
 /**
  *
@@ -12,11 +17,23 @@ import javax.swing.JOptionPane;
  */
 public class FrmEmployeeTable extends javax.swing.JFrame {
 
+    EmployeeController employeeController = new EmployeeController();
+
     /**
      * Creates new form FrmEmployee
      */
     public FrmEmployeeTable() {
         initComponents();
+        load();
+    }
+
+    private void load() {
+        DefaultTableModel Model = (DefaultTableModel) tableEmployee.getModel();
+        Model.setRowCount(0);
+        for (EmployeeModel emloyeeModel : employeeController.getEmployeeTable()) {
+            Object[] objects = {emloyeeModel.getId(), emloyeeModel.getName(), emloyeeModel.getGender(), emloyeeModel.getIdenti(), emloyeeModel.getBirthDate(), emloyeeModel.getAddress(), emloyeeModel.getNumberPhone()};
+            Model.addRow(objects);
+        }
     }
 
     /**
@@ -29,13 +46,13 @@ public class FrmEmployeeTable extends javax.swing.JFrame {
     private void initComponents() {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tableEmployee = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
         txtIDNv = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         txtName = new javax.swing.JTextField();
-        txtCCCD = new javax.swing.JTextField();
+        txtIdenti = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         txtAddress = new javax.swing.JTextField();
@@ -47,7 +64,14 @@ public class FrmEmployeeTable extends javax.swing.JFrame {
         btnInsert = new javax.swing.JButton();
         btnEdit = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
+        btnRefresh = new javax.swing.JButton();
         btnClose = new javax.swing.JButton();
+        cboGender = new javax.swing.JComboBox<>();
+        jLabel7 = new javax.swing.JLabel();
+        btnNewID = new javax.swing.JButton();
+        jPanel3 = new javax.swing.JPanel();
+        btnSorByID = new javax.swing.JButton();
+        SordByName = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -56,30 +80,40 @@ public class FrmEmployeeTable extends javax.swing.JFrame {
             }
         });
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tableEmployee.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
             },
             new String [] {
-                "Mã", "Họ và tên", "Giới tính", "Căn cước", "Địa chỉ", "Ngày sinh", "Địa chỉ", "Số điện thoại", "Ngày nhập"
+                "Mã nhân viên", "Họ và tên", "Giới tính", "Căn cước", "Ngày sinh", "Địa chỉ", "Số điện thoại"
             }
-        ));
-        jScrollPane1.setViewportView(jTable1);
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false, false
+            };
 
-        txtIDNv.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtIDNvActionPerformed(evt);
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
             }
         });
+        tableEmployee.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tableEmployeeMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(tableEmployee);
+        if (tableEmployee.getColumnModel().getColumnCount() > 0) {
+            tableEmployee.getColumnModel().getColumn(0).setPreferredWidth(5);
+        }
 
         jLabel1.setText("Mã nhân viên");
 
         jLabel2.setText("Họ và tên");
 
-        jLabel3.setText("Căn cước");
+        jLabel3.setText("Số căn cước");
 
         jLabel4.setText("Địa chỉ");
 
@@ -87,15 +121,9 @@ public class FrmEmployeeTable extends javax.swing.JFrame {
 
         jLabel6.setText("Số điện thoại");
 
-        txtSDT.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtSDTActionPerformed(evt);
-            }
-        });
-
         jPanel2.setLayout(new java.awt.GridLayout(1, 0));
 
-        btnInsert.setText("Thêm");
+        btnInsert.setText("Thêm nhân viên");
         btnInsert.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnInsertActionPerformed(evt);
@@ -103,7 +131,7 @@ public class FrmEmployeeTable extends javax.swing.JFrame {
         });
         jPanel2.add(btnInsert);
 
-        btnEdit.setText("Sửa");
+        btnEdit.setText("Cập nhật");
         btnEdit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnEditActionPerformed(evt);
@@ -119,6 +147,14 @@ public class FrmEmployeeTable extends javax.swing.JFrame {
         });
         jPanel2.add(btnDelete);
 
+        btnRefresh.setText("Tải lại");
+        btnRefresh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRefreshActionPerformed(evt);
+            }
+        });
+        jPanel2.add(btnRefresh);
+
         btnClose.setText("Thoát");
         btnClose.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -127,40 +163,51 @@ public class FrmEmployeeTable extends javax.swing.JFrame {
         });
         jPanel2.add(btnClose);
 
+        cboGender.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Nam", "Nữ" }));
+
+        jLabel7.setText("Giới tính");
+
+        btnNewID.setText("Tạo mã");
+        btnNewID.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNewIDActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 1036, Short.MAX_VALUE)
                 .addContainerGap())
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(87, 87, 87)
+                .addGap(51, 51, 51)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 88, Short.MAX_VALUE)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(txtName, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(cboGender, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtIdenti, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtIDNv))
+                .addGap(18, 18, 18)
+                .addComponent(btnNewID)
+                .addGap(58, 58, 58)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)
-                    .addComponent(txtIDNv)
-                    .addComponent(txtCCCD))
-                .addGap(107, 107, 107)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(txtDayofBirth, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(txtSDT, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, 77, Short.MAX_VALUE)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(19, 19, 19)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtDayofBirth)
+                    .addComponent(txtAddress, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(txtSDT))
+                .addGap(92, 92, 92))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -172,7 +219,8 @@ public class FrmEmployeeTable extends javax.swing.JFrame {
                     .addComponent(txtIDNv, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1)
                     .addComponent(jLabel5)
-                    .addComponent(txtDayofBirth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtDayofBirth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnNewID))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -183,68 +231,178 @@ public class FrmEmployeeTable extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtSDT, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6)
-                    .addComponent(txtCCCD, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtIdenti, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3))
-                .addContainerGap(31, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cboGender, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7))
+                .addContainerGap(50, Short.MAX_VALUE))
         );
+
+        jPanel3.setLayout(new java.awt.GridLayout());
+
+        btnSorByID.setText("Sắp xếp theo mã nhân viên");
+        btnSorByID.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSorByIDActionPerformed(evt);
+            }
+        });
+        jPanel3.add(btnSorByID);
+
+        SordByName.setText("Sắp xếp theo tên");
+        SordByName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SordByNameActionPerformed(evt);
+            }
+        });
+        jPanel3.add(SordByName);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1048, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 1048, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 286, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void txtIDNvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtIDNvActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtIDNvActionPerformed
-
-    private void txtSDTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSDTActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtSDTActionPerformed
-
     private void btnInsertActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInsertActionPerformed
         // TODO add your handling code here:
+        if (!"".equals(txtIDNv.getText()) && !"".equals(txtAddress.getText()) && !"".equals(txtDayofBirth.getText()) && !"".equals(txtIdenti.getText()) && !"".equals(txtName.getText()) && !"".equals(txtSDT.getText())) {
+            if (JOptionPane.showConfirmDialog(this, "Bạn có muốn thêm thông tin nhân viên mới?", "", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == 0) {
+                EmployeeModel employeeModel = new EmployeeModel(txtIDNv.getText(), txtName.getText(), cboGender.getSelectedItem().toString(), txtIdenti.getText(), txtAddress.getText(), txtDayofBirth.getText(), txtSDT.getText());
+                System.out.println();
+                if (employeeController.insertEmployee(employeeModel) == true) {
+                    JOptionPane.showConfirmDialog(this, "Thông tin đã được thêm!", "", JOptionPane.OK_CANCEL_OPTION);
+                } else {
+                    JOptionPane.showConfirmDialog(this, "Thông tin không thể nhập", "", JOptionPane.OK_CANCEL_OPTION);
+                }
+                btnRefreshActionPerformed(evt);
+            }
+
+        } else {
+            JOptionPane.showConfirmDialog(this, "Vui lòng nhập thông tin", "", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_btnInsertActionPerformed
 
     private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
         // TODO add your handling code here:
+        if (!"".equals(txtIDNv.getText()) && !"".equals(txtAddress.getText()) && !"".equals(txtDayofBirth.getText()) && !"".equals(txtIdenti.getText()) && !"".equals(txtName.getText()) && !"".equals(txtSDT.getText())) {
+            if (JOptionPane.showConfirmDialog(this, "Bạn có muốn thêm thông tin nhân viên mới?", "", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == 0) {
+                EmployeeModel employeeModel = new EmployeeModel(txtIDNv.getText(), txtName.getText(), cboGender.getSelectedItem().toString(), txtIdenti.getText(), txtAddress.getText(), txtDayofBirth.getText(), txtSDT.getText());
+                System.out.println(employeeController.updateEmployee(employeeModel));
+                btnRefreshActionPerformed(evt);
+            }
+
+        } else {
+            JOptionPane.showConfirmDialog(this, "Vui lòng nhập thông tin", "", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_btnEditActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
         // TODO add your handling code here:
+
+        if (!"".equals(txtIDNv.getText())) {
+            if (JOptionPane.showConfirmDialog(this, "Bạn có muốn xoá thông tin nhân viên này?", "", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == 0) {
+                if (employeeController.deletetEmployee(txtIDNv.getText()) == true) {
+                    JOptionPane.showConfirmDialog(this, "Thông tin đã được xoá!", "", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showConfirmDialog(this, "Không thể xoá thông tin!", "", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+                }
+                btnRefreshActionPerformed(evt);
+            }
+        } else {
+            JOptionPane.showConfirmDialog(this, "Vui lòng nhập mã đơn hàng muốn xoá", "", JOptionPane.OK_CANCEL_OPTION);
+        }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseActionPerformed
         // TODO add your handling code here:
-  this.setVisible(false);
+        this.setVisible(false);
         new FrmHome().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnCloseActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         // TODO add your handling code here:
-         this.setVisible(false);
-        new FrmHome().setVisible(true);
+        this.setVisible(false);
+//        new FrmHome().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_formWindowClosing
+
+    private void tableEmployeeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableEmployeeMouseClicked
+        // TODO add your handling code here:
+        int index = tableEmployee.getSelectedRow();
+        EmployeeModel employee = employeeController.getEmloyeeIndex(index);
+        txtIDNv.setText(employee.getId());
+        txtAddress.setText(employee.getAddress());
+        txtDayofBirth.setText(employee.getBirthDate());
+        txtIdenti.setText(employee.getIdenti());
+        txtName.setText(employee.getName());
+        txtSDT.setText(employee.getNumberPhone());
+        cboGender.setSelectedItem(employee.getGender());
+    }//GEN-LAST:event_tableEmployeeMouseClicked
+
+    private void btnNewIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewIDActionPerformed
+        // TODO add your handling code here:
+        LocalDateTime localDateTime = LocalDateTime.now();
+        String code = "";
+        while (code == "" && employeeController.canId(code) == true) {
+            code = localDateTime.getYear() + "" + localDateTime.getDayOfYear() + "NV" + new Random().nextInt(10) + new Random().nextInt(10) + new Random().nextInt(10) + new Random().nextInt(10);
+        }
+
+        txtIDNv.setText(code);
+    }//GEN-LAST:event_btnNewIDActionPerformed
+
+    private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
+        // TODO add your handling code here:
+        load();
+        txtAddress.setText("");
+        txtDayofBirth.setText("");
+        txtIDNv.setText("");
+        txtIdenti.setText("");
+        txtName.setText("");
+        txtSDT.setText("");
+    }//GEN-LAST:event_btnRefreshActionPerformed
+
+    private void btnSorByIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSorByIDActionPerformed
+        // TODO add your handling code here:
+        DefaultTableModel Model = (DefaultTableModel) tableEmployee.getModel();
+        Model.setRowCount(0);
+        for (EmployeeModel emloyeeModel : employeeController.sortByID()) {
+            Object[] objects = {emloyeeModel.getId(), emloyeeModel.getName(), emloyeeModel.getGender(), emloyeeModel.getIdenti(), emloyeeModel.getBirthDate(), emloyeeModel.getAddress(), emloyeeModel.getNumberPhone()};
+            Model.addRow(objects);
+        }
+    }//GEN-LAST:event_btnSorByIDActionPerformed
+
+    private void SordByNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SordByNameActionPerformed
+        // TODO add your handling code here:
+        DefaultTableModel Model = (DefaultTableModel) tableEmployee.getModel();
+        Model.setRowCount(0);
+        for (EmployeeModel emloyeeModel : employeeController.sortByName()) {
+            Object[] objects = {emloyeeModel.getId(), emloyeeModel.getName(), emloyeeModel.getGender(), emloyeeModel.getIdenti(), emloyeeModel.getBirthDate(), emloyeeModel.getAddress(), emloyeeModel.getNumberPhone()};
+            Model.addRow(objects);
+        }
+    }//GEN-LAST:event_SordByNameActionPerformed
 
     /**
      * @param args the command line arguments
@@ -283,24 +441,31 @@ public class FrmEmployeeTable extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton SordByName;
     private javax.swing.JButton btnClose;
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnEdit;
     private javax.swing.JButton btnInsert;
+    private javax.swing.JButton btnNewID;
+    private javax.swing.JButton btnRefresh;
+    private javax.swing.JButton btnSorByID;
+    private javax.swing.JComboBox<String> cboGender;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JTable tableEmployee;
     private javax.swing.JTextField txtAddress;
-    private javax.swing.JTextField txtCCCD;
     private javax.swing.JTextField txtDayofBirth;
     private javax.swing.JTextField txtIDNv;
+    private javax.swing.JTextField txtIdenti;
     private javax.swing.JTextField txtName;
     private javax.swing.JTextField txtSDT;
     // End of variables declaration//GEN-END:variables

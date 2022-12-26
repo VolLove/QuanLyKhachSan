@@ -19,6 +19,10 @@ public class frmRoomTable extends javax.swing.JFrame {
         initComponents();
     }
 
+    
+    public  void  load(){
+        
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -60,7 +64,7 @@ public class frmRoomTable extends javax.swing.JFrame {
                 {null, null, null, null}
             },
             new String [] {
-                "Phòng số", "Tầng", "Tên phòng", "Giá(VND/H')"
+                "Phòng số", "Tầng", "Tên phòng", "Giá(VND/H)"
             }
         ));
         jScrollPane1.setViewportView(tableBill);
