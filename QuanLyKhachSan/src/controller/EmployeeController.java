@@ -115,7 +115,7 @@ public class EmployeeController {
         }
         return emloyeeModels;
     }
-    
+
     public ArrayList<EmployeeModel> sortByID() {
         try {
             preparedStatement = connection.prepareStatement("SELECT * FROM `employee` ORDER BY `_ID` ASC, `_Name` ASC");
@@ -165,4 +165,25 @@ public class EmployeeController {
         return true;
     }
 
+    public ArrayList<EmployeeModel> searchByName(String Name) {
+        try {
+            preparedStatement = connection.prepareStatement("SELECT * FROM `employee` Where `_Name` like '%" + Name + "%'" );
+            
+            resultSet = preparedStatement.executeQuery();
+            emloyeeModels = new ArrayList<>();
+            while (resultSet.next()) {
+                String id = resultSet.getString("_ID");
+                String name = resultSet.getString("_Name");
+                String gender = resultSet.getString("_Gender");
+                String identi = resultSet.getString("_Identi");
+                String address = resultSet.getString("_Address");
+                String birthDate = resultSet.getString("_DayOfBirth");
+                String numberPhone = resultSet.getString("_NumPhone");
+                EmployeeModel emloyeeModel = new EmployeeModel(id, name, gender, identi, address, birthDate, numberPhone);
+                emloyeeModels.add(emloyeeModel);
+            }
+        } catch (SQLException e) {
+        }
+        return emloyeeModels;
+    }
 }

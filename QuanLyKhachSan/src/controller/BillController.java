@@ -24,10 +24,6 @@ public class BillController {
     Statement statement = null;
     ArrayList<BillModel> billModels = new ArrayList<>();
 
-
-    
-
-    
     /**
      *
      * @return
@@ -58,6 +54,9 @@ public class BillController {
     }
 
     public boolean deleteBill(String id) {
+        if (haveID(id) == false) {
+            return false;
+        }
         try {
             statement = connection.createStatement();
             String string = ("DELETE FROM `bill` WHERE `_ID` = '" + id + "'");
@@ -69,7 +68,9 @@ public class BillController {
     }
 
     public boolean updateBill(BillModel billModel) {
-
+        if (haveID(billModel.getId()) == false) {
+            return false;
+        }
         try {
             statement = connection.createStatement();
 
@@ -111,6 +112,16 @@ public class BillController {
     public BillModel getBill(int index) {
         return billModels.get(index);
     }
+
+    public boolean haveID(String id) {
+        for (BillModel billModel : billModels) {
+            if (billModel.getId().equals(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public BillModel getBillByID(String id) {
         for (BillModel billModel : billModels) {
             if (billModel.getId().equals(id)) {
@@ -119,6 +130,7 @@ public class BillController {
         }
         return new BillModel();
     }
+
     public boolean roomEmty(String roomID) {
         for (BillModel billModel : billModels) {
             if (billModel.getIdRoom().compareTo(roomID) == 0 && billModel.getStart() == 0) {
@@ -207,11 +219,36 @@ public class BillController {
         for (BillModel billModel : billModels) {
             if (!billModel.getId().equals(bill.getId())) {
                 if (billModel.getIdRoom().equals(bill.getIdRoom()) && billModel.getStart() == 0) {
-                  
+
                     return false;
                 }
             }
         }
         return true;
+    }
+
+    public ArrayList<BillModel> searchByID(String ID) {
+        ResultSet resultSet;
+        billModels = new ArrayList<>();
+        try {
+            preparedStatement = connection.prepareStatement("SELECT * FROM `bill` where `_ID` = '" + ID + "'");
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                String id = resultSet.getString("_ID");
+                String name = resultSet.getString("_Name");
+                String idClient = resultSet.getString("_Identi");
+                String idEmloyee = resultSet.getString("_IDEmloyee");
+                String idRoom = resultSet.getString("_IDRoom");
+                String timeIn = resultSet.getString("_TimeCheckIn");
+                String timeOut = resultSet.getString("_TimeCheckOut");
+                double pay = resultSet.getDouble("_Pay");
+                int start = resultSet.getInt("_Start");
+                BillModel billModel = new BillModel(id, idClient, name, idEmloyee, idRoom, timeIn, timeOut, pay, start);
+                billModels.add(billModel);
+            }
+
+        } catch (SQLException e) {
+        }
+        return billModels;
     }
 }

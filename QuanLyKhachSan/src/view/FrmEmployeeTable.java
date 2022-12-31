@@ -64,6 +64,7 @@ public class FrmEmployeeTable extends javax.swing.JFrame {
         btnInsert = new javax.swing.JButton();
         btnEdit = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
+        btnSearch = new javax.swing.JButton();
         btnRefresh = new javax.swing.JButton();
         btnClose = new javax.swing.JButton();
         cboGender = new javax.swing.JComboBox<>();
@@ -146,6 +147,14 @@ public class FrmEmployeeTable extends javax.swing.JFrame {
             }
         });
         jPanel2.add(btnDelete);
+
+        btnSearch.setText("Tìm kiếm");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
+        jPanel2.add(btnSearch);
 
         btnRefresh.setText("Tải lại");
         btnRefresh.addActionListener(new java.awt.event.ActionListener() {
@@ -345,7 +354,7 @@ public class FrmEmployeeTable extends javax.swing.JFrame {
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         // TODO add your handling code here:
         this.setVisible(false);
-//        new FrmHome().setVisible(true);
+        new FrmHome().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_formWindowClosing
 
@@ -404,41 +413,21 @@ public class FrmEmployeeTable extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_SordByNameActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        // TODO add your handling code here:
+        if (!"".equals(txtName.getText())) {
+            String nameString = txtName.getText();
+            DefaultTableModel Model = (DefaultTableModel) tableEmployee.getModel();
+            Model.setRowCount(0);
+            for (EmployeeModel emloyeeModel : employeeController.searchByName(nameString)) {
+                Object[] objects = {emloyeeModel.getId(), emloyeeModel.getName(), emloyeeModel.getGender(), emloyeeModel.getIdenti(), emloyeeModel.getBirthDate(), emloyeeModel.getAddress(), emloyeeModel.getNumberPhone()};
+                Model.addRow(objects);
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FrmEmployeeTable.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FrmEmployeeTable.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FrmEmployeeTable.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FrmEmployeeTable.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } else {
+            JOptionPane.showConfirmDialog(this, "Vui lòng nhập tên nhân viên cần tìm", "", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
         }
-        //</editor-fold>
-        //</editor-fold>
+    }//GEN-LAST:event_btnSearchActionPerformed
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new FrmEmployeeTable().setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton SordByName;
@@ -448,6 +437,7 @@ public class FrmEmployeeTable extends javax.swing.JFrame {
     private javax.swing.JButton btnInsert;
     private javax.swing.JButton btnNewID;
     private javax.swing.JButton btnRefresh;
+    private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnSorByID;
     private javax.swing.JComboBox<String> cboGender;
     private javax.swing.JLabel jLabel1;

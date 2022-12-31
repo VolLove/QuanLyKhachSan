@@ -21,11 +21,11 @@ public class RoomController {
 
     private Connection connection = DAO.getCon();
     private PreparedStatement pst;
-    private Statement statement ;
+    private Statement statement;
     private ResultSet resultSet = null;
     private ArrayList<RoomModel> roomModels = new ArrayList<>();
 
-    public ResultSet getRoomTable() {
+    public ArrayList<RoomModel> getRoomTable() {
         try {
             roomModels = new ArrayList<>();
             pst = connection.prepareStatement("SELECT * FROM `room`");
@@ -37,28 +37,77 @@ public class RoomController {
                 RoomModel roomModel = new RoomModel(roomID, roomName, roomPrice);
                 roomModels.add(roomModel);
             }
-
         } catch (SQLException e) {
-            
         }
-        return resultSet;
-    }
-
-    public ArrayList<RoomModel> getListRoom() {
-        getRoomTable();
         return roomModels;
     }
 
     public RoomModel getRoomByIndex(int index) {
-      return roomModels.get(index);
+        return roomModels.get(index);
     }
-    public RoomModel getRoomByID(String id){
+
+    public RoomModel getRoomByID(String id) {
         for (RoomModel roomModel : roomModels) {
-            if (roomModel.getIdRoom().compareTo(id)==0) {
+            if (roomModel.getIdRoom().compareTo(id) == 0) {
                 return roomModel;
             }
         }
         return null;
     }
- 
+
+    public boolean insertRoom(RoomModel roomModel) {
+        try {
+            statement = connection.createStatement();
+            String string = "INSERT INTO `room`(`_ID`, `_Name`, `_Price`) VALUES ("
+                    + "'" + roomModel.getIdRoom() + "',"
+                    + "'" + roomModel.getNameRoom() + "',"
+                    + "'" + roomModel.getPrice() + "'"
+                    + ")";
+            statement.execute(string);
+            return statement != null;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    public boolean deleteRoom(String idRoom) {
+        if (haveRoom(idRoom) == false) {
+            return false;
+        }
+        try {
+
+            statement = connection.createStatement();
+            String string = "DELETE FROM `room` WHERE `_ID` = '" + idRoom + "'";
+            statement.execute(string);
+            return statement != null;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    public boolean updateRoom(RoomModel roomModel) {
+        if (haveRoom(roomModel.getIdRoom()) == false) {
+            return false;
+        }
+        try {
+            statement = connection.createStatement();
+            String string = "UPDATE `room` SET "
+                    + "`_Name`='" + roomModel.getNameRoom() + "',"
+                    + "`_Price`=' " + roomModel.getPrice() + "'"
+                    + " WHERE `_ID` = '" + roomModel.getIdRoom() + "'";
+            statement.execute(string);
+            return statement != null;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    public boolean haveRoom(String id) {
+        for (RoomModel roomModel : roomModels) {
+            if (roomModel.getIdRoom().equals(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

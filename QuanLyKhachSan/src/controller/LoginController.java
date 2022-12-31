@@ -9,7 +9,6 @@ import DAO.DAO;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
  *
@@ -19,10 +18,9 @@ public class LoginController {
 
     private Connection connection = DAO.getCon();
     private PreparedStatement preparedStatement = null;
-    private Statement statement = null;
     private ResultSet resultSet = null;
 
-    public boolean login(String user, String pass) throws SQLException {
+    public boolean login(String user, String pass) {
         try {
             String string = "SELECT * FROM `user` WHERE `_UserName` = " + user + " AND `_PassWord` = " + pass;
             preparedStatement = connection.prepareStatement(string);
@@ -30,8 +28,6 @@ public class LoginController {
             return true;
         } catch (SQLException e) {
             return false;
-        } finally {
-            connection.close();
         }
     }
 }

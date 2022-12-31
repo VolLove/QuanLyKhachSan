@@ -58,6 +58,7 @@ public class FrmBillTable extends javax.swing.JFrame {
         btnInsert = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
         btnEdit = new javax.swing.JButton();
+        btnSearch = new javax.swing.JButton();
         btnRefresh = new javax.swing.JButton();
         btnClose = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
@@ -178,6 +179,14 @@ public class FrmBillTable extends javax.swing.JFrame {
             }
         });
         jPanel2.add(btnEdit);
+
+        btnSearch.setText("Tìm kiếm");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
+        jPanel2.add(btnSearch);
 
         btnRefresh.setText("Tải lại");
         btnRefresh.addActionListener(new java.awt.event.ActionListener() {
@@ -433,7 +442,7 @@ public class FrmBillTable extends javax.swing.JFrame {
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
 
         this.setVisible(false);
-//        new FrmHome().setVisible(true);
+        new FrmHome().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_formWindowClosing
 
@@ -463,7 +472,7 @@ public class FrmBillTable extends javax.swing.JFrame {
 
     private void btnCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseActionPerformed
         this.setVisible(false);
-//        new FrmHome().setVisible(true);
+        new FrmHome().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnCloseActionPerformed
 
@@ -492,18 +501,19 @@ public class FrmBillTable extends javax.swing.JFrame {
             String timeCheckOut = txtTimeCheckOut.getText();
             double pay = Double.parseDouble(txtPhi.getText());
             BillModel billModel = new BillModel(id, identi, name, idEmloyee, idRoom, timeCheckIn, timeCheckOut, pay);
-
             if (billController.roomOrderEmty(billModel) == true) {
                 if ((JOptionPane.showConfirmDialog(this, "Bạn có muốn cập nhật lại thông tin đơn hàng?", "", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == 0)) {
                     if (billController.updateBill(billModel) == true) {
                         JOptionPane.showConfirmDialog(this, "Đơn đặt hàng đã được cập nhật!", "", JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                        btnRefreshActionPerformed(evt);
                     }
-                    btnRefreshActionPerformed(evt);
+                    else{
+                           JOptionPane.showConfirmDialog(this, "Kiểm tra lại thông tin!", "", JOptionPane.OK_OPTION, JOptionPane.WARNING_MESSAGE);
+                    }
                 }
             } else {
                 JOptionPane.showConfirmDialog(this, "Phòng đã được đặt", "", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
             }
-
         } else {
             JOptionPane.showConfirmDialog(this, "Vui lòng nhập thông tin", "", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
         }
@@ -515,8 +525,10 @@ public class FrmBillTable extends javax.swing.JFrame {
         } else if (JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn xoá không?", "Xoá", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == 0) {
             if (billController.deleteBill(txtID.getText()) == true) {
                 JOptionPane.showConfirmDialog(this, "Đơn đặt hàng đã được xoá!", "Đã xoá", JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                loadTable();
+            } else {
+                JOptionPane.showConfirmDialog(this, "Không thể xoá!", "", JOptionPane.OK_OPTION, JOptionPane.WARNING_MESSAGE);
             }
-            loadTable();
         }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
@@ -537,8 +549,11 @@ public class FrmBillTable extends javax.swing.JFrame {
                     BillModel billModel = new BillModel(id, identi, name, idEmloyee, idRoom, timeCheckIn);
                     if (billController.insertBill(billModel) == true) {
                         JOptionPane.showConfirmDialog(this, "Phòng đã đươc đặt!", "", JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                        btnRefreshActionPerformed(evt);
+
+                    } else {
+                        JOptionPane.showConfirmDialog(this, "Không thể đặt phòng!", "", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
                     }
-                    btnRefreshActionPerformed(evt);
                 } else {
                     JOptionPane.showConfirmDialog(this, "Phòng đã có người đặt", "", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
                 }
@@ -627,7 +642,7 @@ public class FrmBillTable extends javax.swing.JFrame {
             String idRoom = roomController.getRoomByIndex(roomIndex).getIdRoom();
             String timeCheckOut = txtTimeCheckOut.getText();
             double hour = Double.parseDouble(txth.getText());
-            double price = roomController.getRoomByID(idRoom).getTotal();
+            double price = roomController.getRoomByID(idRoom).getPrice();
             double pay = hour * price;
             int start = billController.getBillByID(id).getStart();
             if (start == 0) {
@@ -659,13 +674,34 @@ public class FrmBillTable extends javax.swing.JFrame {
             txth.setText(String.valueOf(getDaysDiff));
             int roomIndex = cboPhong.getSelectedIndex();
             String idRoom = roomController.getRoomByIndex(roomIndex).getIdRoom();
-            double price = roomController.getRoomByID(idRoom).getTotal();
+            double price = roomController.getRoomByID(idRoom).getPrice();
             double total = price * (double) getDaysDiff;
             txtPhi.setText(String.valueOf(total));
         } catch (ParseException ex) {
 
         }
     }//GEN-LAST:event_btnTinhPhíActionPerformed
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        // TODO add your handling code here:
+        if (!"".equals(txtID.getText())) {
+            String ID = txtID.getText();
+            DefaultTableModel Model = (DefaultTableModel) tableBill.getModel();
+            Model.setRowCount(0);
+            for (BillModel billModel : billController.searchByID(ID)) {
+                String nameRoom = roomController.getRoomByID(billModel.getIdRoom()).getNameRoom();
+                String nameEmloyee = employeeController.getEmloyeeByID(billModel.getIdEmployee()).getName();
+                String start = "Chưa thanh toán";
+                if (billModel.getStart() == 1) {
+                    start = "Đã thanh toán";
+                }
+                Object[] objects = {billModel.getId(), billModel.getNameClient(), billModel.getIdClient(), nameEmloyee, nameRoom, billModel.getTimeCheckIn(), billModel.getTimeCheckOut(), billModel.getPay(), start};
+                Model.addRow(objects);
+            }
+        } else {
+            JOptionPane.showConfirmDialog(this, "Vui lòng nhập đơn hàng cần tìm!", "", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_btnSearchActionPerformed
 
     private void loadTable() {
 
@@ -698,7 +734,7 @@ public class FrmBillTable extends javax.swing.JFrame {
             Object[] objects = {billModel.getId(), billModel.getNameClient(), billModel.getIdClient(), nameEmloyee, nameRoom, billModel.getTimeCheckIn(), billModel.getTimeCheckOut(), billModel.getPay(), start};
             Model.addRow(objects);
         }
-        for (RoomModel roomModel : roomController.getListRoom()) {
+        for (RoomModel roomModel : roomController.getRoomTable()) {
             cboPhong.addItem(roomModel.getNameRoom());
         }
         for (EmployeeModel emloyeeModel : employeeController.getListEmloyee()) {
@@ -715,6 +751,7 @@ public class FrmBillTable extends javax.swing.JFrame {
     private javax.swing.JButton btnInsert;
     private javax.swing.JButton btnNow;
     private javax.swing.JButton btnRefresh;
+    private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnSortByDate;
     private javax.swing.JButton btnSortByPay;
     private javax.swing.JButton btnThanhToan;
